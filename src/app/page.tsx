@@ -7,11 +7,16 @@ import Timer from './components/Timer';
 export default function Home() {
   const searchParams = useSearchParams();
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const accessToken = searchParams.get('access');
 
   useEffect(() => {
     const startTimer = async () => {
       if (!accessToken) return;
+      
+      setIsLoading(true);
+      setError(null);
 
       try {
         const response = await fetch('/api/start', {
@@ -22,12 +27,18 @@ export default function Home() {
           body: JSON.stringify({ accessToken }),
         });
 
-        if (!response.ok) throw new Error('Failed to start timer');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to start timer');
+        }
 
         const data = await response.json();
         setSessionId(data.sessionId);
       } catch (error) {
         console.error('Error starting timer:', error);
+        setError(error instanceof Error ? error.message : 'Failed to start timer');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -36,6 +47,14 @@ export default function Home() {
 
   if (!accessToken) {
     return <div>Access token required</div>;
+  }
+
+  if (isLoading) {
+    return <div>Starting timer session...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
   }
 
   return (
