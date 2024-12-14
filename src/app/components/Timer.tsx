@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { AlertDialog, AlertDialogContent, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogContent, AlertDialogTitle } from './ui/alert-dialog';
 
 const Timer = ({ sessionId }: { sessionId: string }) => {
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
