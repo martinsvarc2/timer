@@ -1,6 +1,8 @@
 import { createPool } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const { accessToken } = await request.json();
