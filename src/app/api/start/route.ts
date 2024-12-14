@@ -2,10 +2,12 @@ import { createPool } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-// Input validation schema
 const startTimerSchema = z.object({
   accessToken: z.string().min(1),
-  duration: z.number().optional().default(600), // Default 10 minutes
+  duration: z.union([
+    z.number(),
+    z.string().transform((val) => parseInt(val, 10))
+  ]).optional().default(600)
 });
 
 export const dynamic = 'force-dynamic';
@@ -14,8 +16,14 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     
-    // Validate input
+    // Validate and transform input
     const { accessToken, duration } = startTimerSchema.parse(body);
+
+    if (isNaN(duration) || duration < 1 || duration > 7200) {
+      return NextResponse.json({
+        error: 'Invalid duration. Must be between 1 and 7200 seconds'
+      }, { status: 400 });
+    }
 
     const pool = createPool({
       connectionString: process.env.visionboard_PRISMA_URL
@@ -36,30 +44,30 @@ export async function POST(request: Request) {
       }, { status: 409 });
     }
 
-    // Create new session
     const { rows: [session] } = await pool.sql`
       INSERT INTO timer_sessions (
-        access_token, 
-        is_active, 
+        access_token,
+        is_active,
         start_time,
         duration
       )
       VALUES (
-        ${accessToken}, 
+        ${accessToken},
         true,
         CURRENT_TIMESTAMP,
         ${duration}
       )
       RETURNING 
         session_id,
-        EXTRACT(EPOCH FROM start_time) as start_time,
+        access_token,
+        start_time,
         duration;
     `;
 
-    // Create success response
     return NextResponse.json({
       sessionId: session.session_id,
-      startTime: Math.floor(session.start_time),
+      accessToken: session.access_token,
+      startTime: session.start_time,
       duration: session.duration,
       message: 'Timer started successfully'
     });
@@ -98,7 +106,7 @@ export async function GET(request: Request) {
     const { rows: [session] } = await pool.sql`
       SELECT 
         session_id,
-        EXTRACT(EPOCH FROM start_time) as start_time,
+        start_time,
         duration,
         is_active
       FROM timer_sessions
@@ -115,7 +123,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       session: {
         sessionId: session.session_id,
-        startTime: Math.floor(session.start_time),
+        startTime: session.start_time,
         duration: session.duration,
         isActive: session.is_active
       }
