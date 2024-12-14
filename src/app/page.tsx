@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import Timer from '@/components/Timer';
+import Timer from '../components/Timer';
 
 export default function Home() {
   const searchParams = useSearchParams();
