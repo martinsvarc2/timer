@@ -1,10 +1,12 @@
 import { createPool } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const sessionId = searchParams.get('sessionId');
+    const url = new URL(request.url);
+    const sessionId = url.searchParams.get('sessionId');
     
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
