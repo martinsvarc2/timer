@@ -3,11 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { AlertDialog, AlertDialogContent, AlertDialogTitle } from './ui/alert-dialog';
 
-const Timer = ({ sessionId }: { sessionId: string }) => {
+interface TimerProps {
+  sessionId: string;
+  startTime: number;
+}
+
+const Timer = ({ sessionId, startTime }: TimerProps) => {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [showExtend, setShowExtend] = useState(false);
-  const [isValid, setIsValid] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isValid, setIsValid] = useState(true);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -19,17 +23,13 @@ const Timer = ({ sessionId }: { sessionId: string }) => {
           setIsValid(false);
           return;
         }
-        
-        setIsValid(true);
-        // Only start the timer after validation
-        if (timeLeft === null) {
-          setTimeLeft(600); // 10 minutes
+        const data = await response.json();
+        if (data.duration) {
+          setTimeLeft(data.duration);
         }
       } catch (error) {
         console.error('Session validation failed:', error);
         setIsValid(false);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -54,7 +54,7 @@ const Timer = ({ sessionId }: { sessionId: string }) => {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [sessionId, isValid, timeLeft]);
+  }, [sessionId, isValid, startTime]);
 
   const formatTime = (seconds: number | null) => {
     if (seconds === null) return "00:00";
@@ -62,10 +62,6 @@ const Timer = ({ sessionId }: { sessionId: string }) => {
     const secs = seconds % 60;
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
-
-  if (isLoading) {
-    return <div>Validating session...</div>;
-  }
 
   if (!isValid) {
     return <div>Session expired or invalid</div>;
