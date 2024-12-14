@@ -7,6 +7,7 @@ import Timer from './components/Timer';
 interface TimerSession {
   sessionId: string;
   startTime: number;
+  duration: number;
   isActive: boolean;
 }
 
