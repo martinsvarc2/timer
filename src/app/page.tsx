@@ -6,7 +6,7 @@ import Timer from './components/Timer';
 
 interface TimerSession {
   sessionId: string;
-  startTime: number;
+  startTime: string;
   duration: number;
   isActive: boolean;
 }
@@ -23,10 +23,15 @@ export default function Home() {
 
     const checkSession = async () => {
       try {
-        const response = await fetch(`/api/check-session?accessToken=${accessToken}`);
-        if (!response.ok) return;
+        // Fix: Updated parameter name to match API
+        const response = await fetch(`/api/start?access_token=${accessToken}`);
+        if (!response.ok) {
+          console.error('Failed to check session:', await response.text());
+          return;
+        }
 
         const data = await response.json();
+        console.log('Session data:', data); // Debug log
         if (data.session) {
           setSession(data.session);
         }
@@ -79,7 +84,13 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-transparent">
-      {session.isActive && <Timer sessionId={session.sessionId} startTime={session.startTime} />}
+      {session.isActive && (
+        <Timer 
+          sessionId={session.sessionId} 
+          startTime={session.startTime}
+          duration={session.duration}
+        />
+      )}
     </main>
   );
 }
