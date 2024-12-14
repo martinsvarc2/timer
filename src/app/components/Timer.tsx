@@ -5,56 +5,40 @@ import { AlertDialog, AlertDialogContent, AlertDialogTitle } from './ui/alert-di
 
 interface TimerProps {
   sessionId: string;
-  startTime: number;
+  startTime: string;
+  duration: number;
 }
 
-const Timer = ({ sessionId, startTime }: TimerProps) => {
+const Timer = ({ sessionId, startTime, duration }: TimerProps) => {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [showExtend, setShowExtend] = useState(false);
-  const [isValid, setIsValid] = useState(true);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    const calculateTimeLeft = () => {
+      const start = new Date(startTime).getTime();
+      const now = new Date().getTime();
+      const elapsed = Math.floor((now - start) / 1000);
+      const remaining = duration - elapsed;
+      return Math.max(0, remaining);
+    };
 
-    const validateSession = async () => {
-      try {
-        const response = await fetch(`/api/validate?sessionId=${sessionId}`);
-        if (!response.ok) {
-          setIsValid(false);
-          return;
-        }
-        const data = await response.json();
-        if (data.duration) {
-          setTimeLeft(data.duration);
-        }
-      } catch (error) {
-        console.error('Session validation failed:', error);
-        setIsValid(false);
+    setTimeLeft(calculateTimeLeft());
+
+    const interval = setInterval(() => {
+      const remaining = calculateTimeLeft();
+      setTimeLeft(remaining);
+
+      if (remaining <= 60 && remaining > 0) {
+        setShowExtend(true);
       }
-    };
 
-    validateSession();
+      if (remaining <= 0) {
+        clearInterval(interval);
+      }
+    }, 1000);
 
-    if (isValid && timeLeft !== null) {
-      interval = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime === null) return null;
-          if (prevTime <= 60 && prevTime > 0) {
-            setShowExtend(true);
-          }
-          if (prevTime <= 0) {
-            clearInterval(interval);
-            return 0;
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [sessionId, isValid, startTime]);
+    return () => clearInterval(interval);
+  }, [startTime, duration]);
 
   const formatTime = (seconds: number | null) => {
     if (seconds === null) return "00:00";
@@ -62,10 +46,6 @@ const Timer = ({ sessionId, startTime }: TimerProps) => {
     const secs = seconds % 60;
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
-
-  if (!isValid) {
-    return <div>Session expired or invalid</div>;
-  }
 
   return (
     <div className="relative w-full max-w-md mx-auto mt-8">
