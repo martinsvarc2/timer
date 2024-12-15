@@ -61,10 +61,10 @@ export default function Home() {
     );
   }
 
-  if (!session) {
+if (!session) {
     return (
       <div className="min-h-screen w-full flex items-center justify-end pr-8">
-        <span className="text-gray-600">Press 'Start Call'</span>
+        <span className="font-montserrat font-bold text-black">Press 'Start Call'</span>
       </div>
     );
   }
