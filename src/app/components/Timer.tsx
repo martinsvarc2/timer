@@ -44,7 +44,6 @@ const Timer: React.FC<TimerProps> = ({ sessionId, startTime, duration, memberId 
       
       if (remaining <= 0) {
         clearInterval(interval);
-        // Signal to parent that time is up
         window.parent.postMessage({ type: 'TIMER_ENDED' }, '*');
       }
     }, 1000);
@@ -81,7 +80,6 @@ const Timer: React.FC<TimerProps> = ({ sessionId, startTime, duration, memberId 
       }
 
       if (data.success && data.extendPeriod) {
-        // Update duration by adding the new extension period (in seconds)
         duration += data.extendPeriod;
         setShowExtend(false);
       }
@@ -93,47 +91,45 @@ const Timer: React.FC<TimerProps> = ({ sessionId, startTime, duration, memberId 
   };
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return <div className="text-red-500 text-sm">{error}</div>;
   }
 
   return (
-    <div className="relative w-full max-w-md mx-auto mt-4 text-center">
-      <div className="flex items-center justify-center gap-2">
-        <div className="text-4xl font-bold" aria-live="polite" aria-atomic="true">
-          {formatTime(timeLeft)}
-        </div>
-        <button 
-          onClick={() => setShowExtend(true)} 
-          className="bg-[#5B21B6] text-white hover:bg-[#4C1D95] rounded-full py-3 px-8 text-lg font-medium transition-colors duration-200 disabled:opacity-50"
-          disabled={isExtending}
-        >
-          Extend Time
-        </button>
+    <div className="flex items-center justify-end gap-2 px-2">
+      <div className="text-2xl font-bold whitespace-nowrap" aria-live="polite" aria-atomic="true">
+        {formatTime(timeLeft)}
       </div>
+      <button 
+        onClick={() => setShowExtend(true)} 
+        className="bg-[#5B21B6] text-white hover:bg-[#4C1D95] rounded-full py-1.5 px-4 text-sm font-medium transition-colors duration-200 disabled:opacity-50 whitespace-nowrap"
+        disabled={isExtending}
+      >
+        Extend Time
+      </button>
 
       {showExtend && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-[32px] max-w-md w-full m-4">
-            <h2 className="text-4xl font-bold text-center text-[#5B21B6] mb-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-hidden">
+          <div className="bg-white rounded-[24px] max-w-[90%] w-[400px] p-4">
+            <h2 className="text-2xl font-bold text-center text-[#5B21B6] mb-4">
               Extend Call Duration
             </h2>
-            <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-3 gap-2 mb-3">
               {extendOptions.map((option) => (
                 <button
                   key={option.seconds}
                   onClick={() => handleExtend(option)}
-                  className="flex flex-col items-center justify-center p-3 rounded-3xl bg-white shadow-lg hover:bg-gray-50 transition-all duration-200 group disabled:opacity-50"
+                  className="flex flex-col items-center justify-center p-2 rounded-2xl bg-white shadow-md hover:bg-gray-50 transition-all duration-200 disabled:opacity-50"
                   disabled={isExtending}
                 >
-                  <div className="text-xl font-bold mb-1">+ {option.minutes}</div>
-                  <div className="text-lg font-bold mb-2">Minutes</div>
-                  <div className="text-gray-600 text-base">-{option.credits} credit{option.credits > 1 ? 's' : ''}</div>
+                  <div className="text-lg font-bold">+{option.minutes}</div>
+                  <div className="text-sm font-medium">Min</div>
+                  <div className="text-xs text-gray-600">-{option.credits} credit{option.credits > 1 ? 's' : ''}</div>
                 </button>
               ))}
             </div>
             <button
               onClick={() => setShowExtend(false)}
-              className="w-full bg-[#5B21B6] text-white hover:bg-[#4C1D95] rounded-full py-2.5 px-8 text-xl font-medium transition-colors duration-200"
+              className="w-full bg-[#5B21B6] text-white hover:bg-[#4C1D95] rounded-full py-2 text-sm font-medium transition-colors duration-200"
               disabled={isExtending}
             >
               Cancel
