@@ -45,23 +45,34 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [accessToken]);
 
-  if (!accessToken) {
-    return <span className="text-red-600">Access token required</span>;
-  }
-
-  if (error) {
-    return <span className="text-red-600">{error}</span>;
-  }
-
-  if (!session) {
-    return <span className="text-gray-600">Press the Start Call Button</span>;
-  }
-
-  return session.isActive ? (
+ if (!accessToken) {
+  return (
+    <div className={containerStyle}>
+      <span className="text-red-600">Access token required</span>
+    </div>
+  );
+}
+if (error) {
+  return (
+    <div className={containerStyle}>
+      <span className="text-red-600">{error}</span>
+    </div>
+  );
+}
+if (!session) {
+  return (
+    <div className={containerStyle}>
+      <span className="text-gray-600">Press the Start Call Button</span>
+    </div>
+  );
+}
+return session.isActive ? (
+  <div className={containerStyle}>
     <Timer 
       sessionId={session.sessionId} 
       startTime={session.startTime}
       duration={session.duration}
     />
-  ) : null;
+  </div>
+) : null;
 }
