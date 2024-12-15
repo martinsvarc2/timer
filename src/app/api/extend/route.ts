@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 const extendRequestSchema = z.object({
-  sessionId: z.string() // This will match against access_token in DB
+  sessionId: z.string(),
+  extendedMinutes: z.number().min(1).max(120) // Allowing 1-120 minutes extension
 });
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { sessionId } = extendRequestSchema.parse(body);
+    const { sessionId, extendedMinutes } = extendRequestSchema.parse(body);
 
     const pool = createPool({
       connectionString: process.env.visionboard_PRISMA_URL
@@ -30,8 +31,8 @@ export async function POST(request: Request) {
       }, { status: 404 });
     }
 
-    // Calculate new duration (extend by 30 minutes = 1800 seconds)
-    const extensionSeconds = 1800;
+    // Convert minutes to seconds for database
+    const extensionSeconds = extendedMinutes * 60;
     const newDuration = session.duration + extensionSeconds;
 
     // Update the session duration
