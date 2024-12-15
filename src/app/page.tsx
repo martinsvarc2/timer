@@ -17,6 +17,13 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const accessToken = searchParams.get('access');
 
+useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'TIMER_ENDED') {
+        window.location.href = 'https://app.trainedbyai.com/sales-arena';
+      }
+    };
+
   // Poll for active session
   useEffect(() => {
     if (!accessToken) return;
