@@ -11,7 +11,6 @@ interface TimerSession {
 }
 
 export default function Home() {
-  const containerStyle = "min-h-screen w-full flex items-center justify-right";
   const searchParams = useSearchParams();
   const [session, setSession] = useState<TimerSession | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -23,13 +22,13 @@ export default function Home() {
         window.location.href = 'https://app.trainedbyai.com/sales-arena';
       }
     };
-
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
   useEffect(() => {
     if (!accessToken) return;
+    
     const checkSession = async () => {
       try {
         const response = await fetch(`/api/start?access_token=${accessToken}`);
@@ -46,34 +45,37 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [accessToken]);
 
- if (!accessToken) {
-  return (
-    <div className={containerStyle}>
-      <span className="text-red-600">Access token required</span>
+  if (!accessToken) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-end pr-8">
+        <span className="text-red-600">Access token required</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-end pr-8">
+        <span className="text-red-600">{error}</span>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-end pr-8">
+        <span className="text-gray-600">Press the Start Call Button</span>
+      </div>
+    );
+  }
+
+  return session.isActive ? (
+    <div className="min-h-screen w-full flex items-center justify-end pr-8">
+      <Timer 
+        sessionId={session.sessionId} 
+        startTime={session.startTime}
+        duration={session.duration}
+      />
     </div>
-  );
-}
-if (error) {
-  return (
-    <div className={containerStyle}>
-      <span className="text-red-600">{error}</span>
-    </div>
-  );
-}
-if (!session) {
-  return (
-    <div className={containerStyle}>
-      <span className="text-gray-600">Press the Start Call Button</span>
-    </div>
-  );
-}
-return session.isActive ? (
-  <div className={containerStyle}>
-    <Timer 
-      sessionId={session.sessionId} 
-      startTime={session.startTime}
-      duration={session.duration}
-    />
-  </div>
-) : null;
+  ) : null;
 }
