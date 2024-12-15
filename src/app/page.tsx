@@ -11,7 +11,7 @@ interface TimerSession {
 }
 
 export default function Home() {
-  const containerStyle = "min-h-screen w-full flex items-center justify-center";
+  const containerStyle = "min-h-screen w-full flex items-right justify-center";
   const searchParams = useSearchParams();
   const [session, setSession] = useState<TimerSession | null>(null);
   const [error, setError] = useState<string | null>(null);
