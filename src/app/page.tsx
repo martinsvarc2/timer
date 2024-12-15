@@ -32,14 +32,9 @@ export default function Home() {
     const checkSession = async () => {
       try {
         const response = await fetch(`/api/start?access_token=${accessToken}`);
-        if (!response.ok) {
-          console.error('Failed to check session:', await response.text());
-          return;
-        }
+        if (!response.ok) return;
         const data = await response.json();
-        if (data.session) {
-          setSession(data.session);
-        }
+        if (data.session) setSession(data.session);
       } catch (err) {
         console.error('Error checking session:', err);
       }
@@ -51,38 +46,22 @@ export default function Home() {
   }, [accessToken]);
 
   if (!accessToken) {
-    return (
-      <div className="text-right text-sm text-red-600 px-2">
-        Access token is required
-      </div>
-    );
+    return <span className="text-red-600">Access token required</span>;
   }
 
   if (error) {
-    return (
-      <div className="text-right text-sm text-red-600 px-2">
-        {error}
-      </div>
-    );
+    return <span className="text-red-600">{error}</span>;
   }
 
   if (!session) {
-    return (
-      <div className="text-right text-sm text-gray-600 px-2">
-        Press the Start Call Button
-      </div>
-    );
+    return <span className="text-gray-600">Press the Start Call Button</span>;
   }
 
-  return (
-    <div className="bg-transparent">
-      {session.isActive && (
-        <Timer 
-          sessionId={session.sessionId} 
-          startTime={session.startTime}
-          duration={session.duration}
-        />
-      )}
-    </div>
-  );
+  return session.isActive ? (
+    <Timer 
+      sessionId={session.sessionId} 
+      startTime={session.startTime}
+      duration={session.duration}
+    />
+  ) : null;
 }
