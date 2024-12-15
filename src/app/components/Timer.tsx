@@ -55,15 +55,8 @@ const Timer: React.FC<TimerProps> = ({ sessionId, startTime, duration, memberId 
   if (error) return <span className="text-red-500 text-sm">{error}</span>;
 
   return (
-    <span className="inline-flex items-center gap-2 h-7">
+    <span className="inline-flex items-center h-7">
       <span className="text-xl leading-7">{formatTime(timeLeft)}</span>
-      <button 
-        onClick={handleExtendClick}
-        className="bg-[#5B21B6] text-white text-sm px-4 h-7 rounded-full hover:bg-[#4C1D95] disabled:opacity-50"
-        disabled={isExtending}
-      >
-        Extend Time
-      </button>
     </span>
   );
 };
