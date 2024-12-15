@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 const extendRequestSchema = z.object({
-  sessionId: z.string()
+  sessionId: z.string() // This will match against access_token in DB
 });
 
 export const dynamic = 'force-dynamic';
@@ -17,10 +17,10 @@ export async function POST(request: Request) {
       connectionString: process.env.visionboard_PRISMA_URL
     });
 
-    // First check if session exists and is active
+    // Check if session exists and is active using access_token column
     const { rows: [session] } = await pool.sql`
       SELECT * FROM timer_sessions 
-      WHERE session_id = ${sessionId}
+      WHERE access_token = ${sessionId}
       AND is_active = true;
     `;
 
@@ -38,7 +38,8 @@ export async function POST(request: Request) {
     const { rows: [updatedSession] } = await pool.sql`
       UPDATE timer_sessions 
       SET duration = ${newDuration}
-      WHERE session_id = ${sessionId}
+      WHERE access_token = ${sessionId}
+      AND is_active = true
       RETURNING session_id, duration, start_time;
     `;
 
