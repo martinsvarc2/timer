@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
+import { Button } from "@/app/components/ui/button";
 
 interface TimerProps {
   sessionId: string;
@@ -103,13 +103,13 @@ const Timer: React.FC<TimerProps> = ({ sessionId, startTime, duration, memberId 
         <div className="text-4xl font-bold" aria-live="polite" aria-atomic="true">
           {formatTime(timeLeft)}
         </div>
-        <Button 
-          onClick={() => setShowExtend(true)} 
-          className="!bg-[#5B21B6] !text-white hover:!bg-[#4C1D95] !rounded-full !py-3 !px-8 !text-lg !font-medium transition-colors duration-200"
-          disabled={isExtending}
-        >
-          Extend Time
-        </Button>
+        <button 
+  onClick={() => setShowExtend(true)} 
+  className="bg-[#5B21B6] text-white hover:bg-[#4C1D95] rounded-full py-3 px-8 text-lg font-medium transition-colors duration-200 disabled:opacity-50"
+  disabled={isExtending}
+>
+  Extend Time
+</button>
       </div>
 
       <AlertDialog open={showExtend} onOpenChange={setShowExtend}>
