@@ -16,7 +16,6 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const accessToken = searchParams.get('access');
 
-  // Add message listener for iframe communication
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'TIMER_ENDED') {
@@ -28,10 +27,8 @@ export default function Home() {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  // Poll for active session
   useEffect(() => {
     if (!accessToken) return;
-
     const checkSession = async () => {
       try {
         const response = await fetch(`/api/start?access_token=${accessToken}`);
@@ -40,7 +37,6 @@ export default function Home() {
           return;
         }
         const data = await response.json();
-        console.log('Session data:', data); // Debug log
         if (data.session) {
           setSession(data.session);
         }
@@ -49,7 +45,6 @@ export default function Home() {
       }
     };
 
-    // Check immediately and then every 2 seconds
     checkSession();
     const interval = setInterval(checkSession, 2000);
     return () => clearInterval(interval);
@@ -57,36 +52,30 @@ export default function Home() {
 
   if (!accessToken) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center p-6 rounded-lg bg-red-50 text-red-600">
-          Access token is required
-        </div>
+      <div className="text-right text-sm text-red-600 px-2">
+        Access token is required
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center p-6 rounded-lg bg-red-50 text-red-600">
-          {error}
-        </div>
+      <div className="text-right text-sm text-red-600 px-2">
+        {error}
       </div>
     );
   }
 
   if (!session) {
-  return (
-    <div className="flex items-center justify-end px-2">
-      <div className="text-sm text-gray-700 whitespace-nowrap">
+    return (
+      <div className="text-right text-sm text-gray-600 px-2">
         Press the Start Call Button
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-transparent">
+    <div className="bg-transparent">
       {session.isActive && (
         <Timer 
           sessionId={session.sessionId} 
@@ -94,6 +83,6 @@ export default function Home() {
           duration={session.duration}
         />
       )}
-    </main>
+    </div>
   );
 }
