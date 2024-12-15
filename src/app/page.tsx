@@ -76,19 +76,14 @@ export default function Home() {
   }
 
   if (!session) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center p-6 rounded-lg bg-white shadow-lg">
-          <div className="text-xl font-semibold text-gray-700">
-            Waiting for session to start...
-          </div>
-          <div className="mt-2 text-sm text-gray-500">
-            Session will begin when triggered
-          </div>
-        </div>
+  return (
+    <div className="flex items-center justify-end px-2">
+      <div className="text-sm text-gray-700 whitespace-nowrap">
+        Press the Start Call Button
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <main className="min-h-screen bg-transparent">
