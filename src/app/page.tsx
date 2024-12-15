@@ -1,5 +1,4 @@
 'use client';
-
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Timer from './components/Timer';
@@ -17,12 +16,17 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const accessToken = searchParams.get('access');
 
-useEffect(() => {
+  // Add message listener for iframe communication
+  useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'TIMER_ENDED') {
         window.location.href = 'https://app.trainedbyai.com/sales-arena';
       }
     };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   // Poll for active session
   useEffect(() => {
@@ -30,13 +34,11 @@ useEffect(() => {
 
     const checkSession = async () => {
       try {
-        // Fix: Updated parameter name to match API
         const response = await fetch(`/api/start?access_token=${accessToken}`);
         if (!response.ok) {
           console.error('Failed to check session:', await response.text());
           return;
         }
-
         const data = await response.json();
         console.log('Session data:', data); // Debug log
         if (data.session) {
@@ -50,7 +52,6 @@ useEffect(() => {
     // Check immediately and then every 2 seconds
     checkSession();
     const interval = setInterval(checkSession, 2000);
-
     return () => clearInterval(interval);
   }, [accessToken]);
 
