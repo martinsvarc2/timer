@@ -12,6 +12,7 @@ const Timer: React.FC<TimerProps> = ({ sessionId, startTime, duration, memberId 
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [isExtending, setIsExtending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLastMinute, setIsLastMinute] = useState(false);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -25,6 +26,10 @@ const Timer: React.FC<TimerProps> = ({ sessionId, startTime, duration, memberId 
     const interval = setInterval(() => {
       const remaining = calculateTimeLeft();
       setTimeLeft(remaining);
+      
+      // Check if we're in the last minute
+      setIsLastMinute(remaining <= 60);
+      
       if (remaining <= 0) {
         clearInterval(interval);
         window.parent.postMessage({ type: 'TIMER_ENDED' }, '*');
@@ -55,7 +60,13 @@ const Timer: React.FC<TimerProps> = ({ sessionId, startTime, duration, memberId 
 
   return (
     <span className="inline-flex items-center h-7">
-      <span className="text-xl leading-7 font-montserrat font-bold text-black">
+      <span 
+        className={`
+          text-xl leading-7 font-montserrat font-bold
+          ${isLastMinute ? 'text-red-600 animate-heartbeat' : 'text-black'}
+          transition-colors duration-300
+        `}
+      >
         {formatTime(timeLeft)}
       </span>
     </span>
