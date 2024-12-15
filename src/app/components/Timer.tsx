@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/app/components/ui/button";
 
 interface TimerProps {
   sessionId: string;
@@ -104,42 +103,44 @@ const Timer: React.FC<TimerProps> = ({ sessionId, startTime, duration, memberId 
           {formatTime(timeLeft)}
         </div>
         <button 
-  onClick={() => setShowExtend(true)} 
-  className="bg-[#5B21B6] text-white hover:bg-[#4C1D95] rounded-full py-3 px-8 text-lg font-medium transition-colors duration-200 disabled:opacity-50"
-  disabled={isExtending}
->
-  Extend Time
-</button>
+          onClick={() => setShowExtend(true)} 
+          className="bg-[#5B21B6] text-white hover:bg-[#4C1D95] rounded-full py-3 px-8 text-lg font-medium transition-colors duration-200 disabled:opacity-50"
+          disabled={isExtending}
+        >
+          Extend Time
+        </button>
       </div>
 
-      <AlertDialog open={showExtend} onOpenChange={setShowExtend}>
-        <AlertDialogContent className="bg-white p-4 rounded-[32px] max-w-md">
-          <h2 className="text-4xl font-bold text-center text-[#5B21B6] mb-6">
-            Extend Call Duration
-          </h2>
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            {extendOptions.map((option) => (
-              <button
-                key={option.seconds}
-                onClick={() => handleExtend(option)}
-                className="flex flex-col items-center justify-center p-3 rounded-3xl bg-white shadow-lg hover:bg-gray-50 transition-all duration-200 group disabled:opacity-50"
-                disabled={isExtending}
-              >
-                <div className="text-xl font-bold mb-1">+ {option.minutes}</div>
-                <div className="text-lg font-bold mb-2">Minutes</div>
-                <div className="text-gray-600 text-base">-{option.credits} credit{option.credits > 1 ? 's' : ''}</div>
-              </button>
-            ))}
+      {showExtend && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-[32px] max-w-md w-full m-4">
+            <h2 className="text-4xl font-bold text-center text-[#5B21B6] mb-6">
+              Extend Call Duration
+            </h2>
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              {extendOptions.map((option) => (
+                <button
+                  key={option.seconds}
+                  onClick={() => handleExtend(option)}
+                  className="flex flex-col items-center justify-center p-3 rounded-3xl bg-white shadow-lg hover:bg-gray-50 transition-all duration-200 group disabled:opacity-50"
+                  disabled={isExtending}
+                >
+                  <div className="text-xl font-bold mb-1">+ {option.minutes}</div>
+                  <div className="text-lg font-bold mb-2">Minutes</div>
+                  <div className="text-gray-600 text-base">-{option.credits} credit{option.credits > 1 ? 's' : ''}</div>
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowExtend(false)}
+              className="w-full bg-[#5B21B6] text-white hover:bg-[#4C1D95] rounded-full py-2.5 px-8 text-xl font-medium transition-colors duration-200"
+              disabled={isExtending}
+            >
+              Cancel
+            </button>
           </div>
-          <button
-            onClick={() => setShowExtend(false)}
-            className="w-full bg-[#5B21B6] text-white hover:bg-[#4C1D95] rounded-full py-2.5 px-8 text-xl font-medium transition-colors duration-200"
-            disabled={isExtending}
-          >
-            Cancel
-          </button>
-        </AlertDialogContent>
-      </AlertDialog>
+        </div>
+      )}
     </div>
   );
 };
