@@ -64,7 +64,7 @@ export default function Home() {
   if (!session) {
     return (
       <div className="min-h-screen w-full flex items-center justify-end pr-8">
-        <span className="text-gray-600">Press the Start Call Button</span>
+        <span className="text-gray-600">Press 'Start Call'</span>
       </div>
     );
   }
