@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 
 interface TimerProps {
@@ -56,7 +55,9 @@ const Timer: React.FC<TimerProps> = ({ sessionId, startTime, duration, memberId 
 
   return (
     <span className="inline-flex items-center h-7">
-      <span className="text-xl leading-7">{formatTime(timeLeft)}</span>
+      <span className="text-xl leading-7 font-montserrat font-bold text-black">
+        {formatTime(timeLeft)}
+      </span>
     </span>
   );
 };
