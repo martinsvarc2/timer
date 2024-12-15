@@ -1,52 +1,57 @@
+import { createPool } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
 const extendRequestSchema = z.object({
-  sessionId: z.string(),
-  memberId: z.string(),
-  extendedMinutes: z.number()
+  sessionId: z.string()
 });
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { sessionId, memberId, extendedMinutes } = extendRequestSchema.parse(body);
+    const { sessionId } = extendRequestSchema.parse(body);
 
-    // Call the webhook
-    const webhookResponse = await fetch('https://hook.eu2.make.com/daxebfbbpbxk1lncme1mga4k365qu9g7', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        memberId,
-        extendedMinutes
-      })
+    const pool = createPool({
+      connectionString: process.env.visionboard_PRISMA_URL
     });
 
-    if (!webhookResponse.ok) {
+    // First check if session exists and is active
+    const { rows: [session] } = await pool.sql`
+      SELECT * FROM timer_sessions 
+      WHERE session_id = ${sessionId}
+      AND is_active = true;
+    `;
+
+    if (!session) {
       return NextResponse.json({ 
-        error: 'Failed to process extension request' 
-      }, { status: 500 });
+        error: 'Invalid or expired session' 
+      }, { status: 404 });
     }
 
-    const webhookData = await webhookResponse.json();
+    // Calculate new duration (extend by 30 minutes = 1800 seconds)
+    const extensionSeconds = 1800;
+    const newDuration = session.duration + extensionSeconds;
 
-    if (!webhookData.Valid) {
-      return NextResponse.json({ 
-        error: 'Extension request denied', 
-        reason: 'Invalid request or insufficient credits' 
-      }, { status: 400 });
-    }
+    // Update the session duration
+    const { rows: [updatedSession] } = await pool.sql`
+      UPDATE timer_sessions 
+      SET duration = ${newDuration}
+      WHERE session_id = ${sessionId}
+      RETURNING session_id, duration, start_time;
+    `;
 
-    // If valid, return the extension period
     return NextResponse.json({
       success: true,
-      extendPeriod: webhookData.ExtendPeriod
+      sessionId: updatedSession.session_id,
+      newDuration: updatedSession.duration,
+      startTime: updatedSession.start_time,
+      extensionAdded: extensionSeconds
     });
 
   } catch (error) {
-    console.error('Error processing extension request:', error);
+    console.error('Error extending session:', error);
     
     if (error instanceof z.ZodError) {
       return NextResponse.json({
@@ -56,7 +61,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      error: 'Failed to process extension request'
+      error: 'Failed to extend session'
     }, { status: 500 });
   }
 }
